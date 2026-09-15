@@ -1,167 +1,256 @@
 import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
+import { Search as SearchIcon, Film } from "lucide-react";
+
 import type { IMovie } from "../../types/movie";
-import { getPopularMovies, searchMovies } from "../../services/movieApi";
+import { searchMovies } from "../../services/movieApi";
 import MovieGrid from "../../components/MovieGrid/MovieGrid";
+import Loading from "../../components/Loading/Loading";
 
 const Search = () => {
-  const [searchParams, setSearchParams] = useSearchParams();
+  const [searchParams] = useSearchParams();
 
-  const queryFromUrl = searchParams.get("query") || "";
+  const query = searchParams.get("query")?.trim() ?? "";
 
-  const [searchTerm, setSearchTerm] = useState(queryFromUrl);
   const [movies, setMovies] = useState<IMovie[]>([]);
-  const [popularMovies, setPopularMovies] = useState<IMovie[]>([]);
   const [loading, setLoading] = useState(false);
-  const [popularLoading, setPopularLoading] = useState(true);
+  const [error, setError] = useState("");
 
-  // Load popular movies when Search page opens
-  useEffect(() => {
-    const fetchPopularMovies = async () => {
-      try {
-        const data = await getPopularMovies();
-        setPopularMovies(data);
-      } catch (error) {
-        console.error(error);
-      } finally {
-        setPopularLoading(false);
-      }
-    };
-
-    fetchPopularMovies();
-  }, []);
-
-  // Search movies
   useEffect(() => {
     const fetchSearchResults = async () => {
-      if (!queryFromUrl.trim()) {
+      if (!query) {
         setMovies([]);
         return;
       }
 
       try {
         setLoading(true);
+        setError("");
 
-        const data = await searchMovies(queryFromUrl);
+        const data = await searchMovies(query);
 
         setMovies(data);
-      } catch (error) {
-        console.error(error);
+      } catch {
+        setError("Failed to search movies");
       } finally {
         setLoading(false);
       }
     };
 
     fetchSearchResults();
-  }, [queryFromUrl]);
+  }, [query]);
 
-  const handleSearch = () => {
-    const query = searchTerm.trim();
+  if (loading) {
+    return <Loading />;
+  }
 
-    if (!query) {
-      setSearchParams({});
-      return;
-    }
-
-    setSearchParams({ query });
-  };
-
-  const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
-    if (event.key === "Enter") {
-      handleSearch();
-    }
-  };
+  if (error) {
+    return (
+      <div className="flex min-h-[60vh] items-center justify-center">
+        <p className="text-red-400">{error}</p>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen text-white">
-      {/* Search Hero */}
-      <section className="mb-10 rounded-2xl border border-gray-800 bg-gradient-to-br from-gray-900 via-gray-950 to-red-950/30 p-8 md:p-12">
-        <p className="mb-3 text-sm font-semibold uppercase tracking-widest text-red-500">
-          MovieHub Search
-        </p>
-
-        <h1 className="mb-3 text-4xl font-bold md:text-5xl">
-          Find your next movie 🎬
-        </h1>
-
-        <p className="mb-8 max-w-2xl text-gray-400">
-          Search thousands of movies and discover something worth watching
-          tonight.
-        </p>
-
-        {/* Search Input */}
-        <div className="flex w-full max-w-3xl">
-          <input
-            type="text"
-            value={searchTerm}
-            onChange={(event) => setSearchTerm(event.target.value)}
-            onKeyDown={handleKeyDown}
-            placeholder="Search for a movie..."
-            className="min-w-0 flex-1 rounded-l-xl border border-gray-700 bg-gray-900 px-5 py-4 text-white outline-none placeholder:text-gray-500 focus:border-red-500"
-          />
-
-          <button
-            onClick={handleSearch}
-            className="rounded-r-xl bg-red-600 px-6 font-semibold transition hover:bg-red-700"
-          >
-            🔍 Search
-          </button>
-        </div>
-      </section>
-
-      {/* Search Results */}
-      {queryFromUrl ? (
-        <section>
-          <div className="mb-6 flex items-center justify-between">
-            <div>
-              <h2 className="text-2xl font-bold">Search Results</h2>
-
-              <p className="mt-1 text-gray-500">Results for "{queryFromUrl}"</p>
+      <div className="mx-auto max-w-[1600px] px-4 py-8 sm:px-6 lg:px-8">
+        {/* Header */}
+        <div className="mb-10">
+          <div className="mb-4 flex items-center gap-3">
+            <div
+              className="
+                flex
+                h-11
+                w-11
+                items-center
+                justify-center
+                rounded-xl
+                border
+                border-red-500/10
+                bg-red-500/10
+                text-red-400
+              "
+            >
+              <SearchIcon size={21} />
             </div>
 
-            <span className="rounded-full bg-gray-800 px-4 py-2 text-sm text-gray-300">
-              {movies.length} movies
+            <span
+              className="
+                text-[11px]
+                font-bold
+                uppercase
+                tracking-[0.25em]
+                text-red-400
+              "
+            >
+              Movie Search
             </span>
           </div>
 
-          {loading ? (
-            <div className="py-20 text-center">
-              <p className="text-lg text-gray-400">Searching movies...</p>
-            </div>
-          ) : movies.length > 0 ? (
-            <MovieGrid movies={movies} />
-          ) : (
-            <div className="rounded-2xl border border-gray-800 bg-gray-900/50 py-20 text-center">
-              <div className="mb-4 text-5xl">😕</div>
+          {query ? (
+            <>
+              <h1
+                className="
+                  text-3xl
+                  font-black
+                  tracking-tight
+                  text-white
+                  sm:text-4xl
+                "
+              >
+                Search Results
+              </h1>
 
-              <h2 className="text-2xl font-bold">No movies found</h2>
-
-              <p className="mt-2 text-gray-500">
-                Try searching with a different movie title.
+              <p className="mt-3 text-sm text-zinc-600 sm:text-base">
+                Showing results for{" "}
+                <span className="font-semibold text-zinc-300">"{query}"</span>
               </p>
-            </div>
-          )}
-        </section>
-      ) : (
-        /* Empty Search State */
-        <section>
-          <div className="mb-6">
-            <h2 className="text-2xl font-bold">Popular Movies 🔥</h2>
+            </>
+          ) : (
+            <>
+              <h1
+                className="
+                  text-3xl
+                  font-black
+                  tracking-tight
+                  text-white
+                  sm:text-4xl
+                "
+              >
+                Search Movies
+              </h1>
 
-            <p className="mt-1 text-gray-500">
-              Not sure what to search? Start with these.
+              <p className="mt-3 max-w-xl text-sm leading-6 text-zinc-600 sm:text-base">
+                Search for your favorite movies using the search bar above.
+              </p>
+            </>
+          )}
+        </div>
+
+        {/* No query */}
+        {!query && (
+          <div
+            className="
+              flex
+              min-h-[350px]
+              flex-col
+              items-center
+              justify-center
+
+              rounded-3xl
+              border
+              border-white/[0.06]
+              bg-white/[0.02]
+
+              px-6
+              text-center
+            "
+          >
+            <div
+              className="
+                mb-5
+                flex
+                h-16
+                w-16
+                items-center
+                justify-center
+
+                rounded-2xl
+                bg-red-500/10
+                text-red-400
+              "
+            >
+              <SearchIcon size={28} />
+            </div>
+
+            <h2 className="text-xl font-bold text-white">
+              What are you looking for?
+            </h2>
+
+            <p className="mt-2 max-w-md text-sm leading-6 text-zinc-600">
+              Enter a movie name in the search bar to discover movies and
+              explore their details.
             </p>
           </div>
+        )}
 
-          {popularLoading ? (
-            <div className="py-20 text-center text-gray-400">
-              Loading popular movies...
+        {/* Results */}
+        {query && movies.length > 0 && (
+          <>
+            <div className="mb-7 flex items-center gap-3">
+              <span
+                className="
+                  rounded-lg
+                  border
+                  border-white/[0.06]
+                  bg-white/[0.03]
+                  px-3
+                  py-1.5
+                  text-xs
+                  text-zinc-500
+                "
+              >
+                {movies.length} results
+              </span>
+
+              <span className="h-1 w-1 rounded-full bg-zinc-700" />
+
+              <span className="text-xs text-zinc-600">
+                Movies matching your search
+              </span>
             </div>
-          ) : (
-            <MovieGrid movies={popularMovies} />
-          )}
-        </section>
-      )}
+
+            <MovieGrid movies={movies} />
+          </>
+        )}
+
+        {/* No results */}
+        {query && movies.length === 0 && (
+          <div
+            className="
+              flex
+              min-h-[350px]
+              flex-col
+              items-center
+              justify-center
+
+              rounded-3xl
+              border
+              border-white/[0.06]
+              bg-white/[0.02]
+
+              px-6
+              text-center
+            "
+          >
+            <div
+              className="
+                mb-5
+                flex
+                h-16
+                w-16
+                items-center
+                justify-center
+
+                rounded-2xl
+                bg-white/[0.04]
+                text-zinc-600
+              "
+            >
+              <Film size={28} />
+            </div>
+
+            <h2 className="text-xl font-bold text-white">No movies found</h2>
+
+            <p className="mt-2 max-w-md text-sm leading-6 text-zinc-600">
+              We couldn't find any movies matching{" "}
+              <span className="text-zinc-400">"{query}"</span>. Try searching
+              with a different title.
+            </p>
+          </div>
+        )}
+      </div>
     </div>
   );
 };

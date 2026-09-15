@@ -1,17 +1,33 @@
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
+
+import {
+  ArrowLeft,
+  CalendarDays,
+  Clock3,
+  Heart,
+  Play,
+  Star,
+} from "lucide-react";
+
 import { getMovieDetails, getMovieTrailer } from "../../services/movieApi";
+
 import type { IMovieDetails } from "../../types/movie";
 import loadingImage from "../../assets/loading.png";
+import { useFavorites } from "../../context/useFavorites";
 
 function MovieDetails() {
   const { id } = useParams<{ id: string }>();
+
+  const { addToFavorites, removeFromFavorites, isFavorite } = useFavorites();
 
   const [movie, setMovie] = useState<IMovieDetails | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  // Trailer states
+  const favorite = movie ? isFavorite(movie.id) : false;
+
+  // Trailer
   const [trailerKey, setTrailerKey] = useState<string | null>(null);
   const [showTrailer, setShowTrailer] = useState(false);
   const [trailerLoading, setTrailerLoading] = useState(false);
@@ -30,6 +46,7 @@ function MovieDetails() {
         setError("");
 
         const data = await getMovieDetails(id);
+
         setMovie(data);
       } catch (err) {
         console.error(err);
@@ -42,7 +59,25 @@ function MovieDetails() {
     fetchMovieDetails();
   }, [id]);
 
-  // Fetch and open trailer
+  // Trailer
+  const handleFavorite = () => {
+    if (!movie) return;
+
+    if (favorite) {
+      removeFromFavorites(movie.id);
+    } else {
+      addToFavorites({
+        id: movie.id,
+        title: movie.title,
+        overview: movie.overview,
+        poster_path: movie.poster_path,
+        backdrop_path: movie.backdrop_path,
+        release_date: movie.release_date,
+        vote_average: movie.vote_average,
+        genre_ids: movie.genres?.map((genre) => genre.id) ?? [],
+      });
+    }
+  };
   const handleWatchTrailer = async () => {
     if (!id) return;
 
@@ -69,11 +104,11 @@ function MovieDetails() {
   // Loading
   if (loading) {
     return (
-      <main className="h-screen w-screen bg-black flex items-center justify-center overflow-hidden">
+      <main className="flex min-h-screen items-center justify-center bg-[#07070a]">
         <img
           src={loadingImage}
           alt="Loading"
-          className="w-screen h-screen object-contain"
+          className="h-screen w-full object-contain"
         />
       </main>
     );
@@ -82,18 +117,40 @@ function MovieDetails() {
   // Error
   if (error || !movie) {
     return (
-      <main className="min-h-screen bg-black text-white flex flex-col items-center justify-center gap-5 px-5">
-        <div className="text-6xl">🎬</div>
+      <main className="flex min-h-screen flex-col items-center justify-center bg-[#07070a] px-5 text-white">
+        <div
+          className="
+            mb-5 flex h-20 w-20
+            items-center justify-center
+            rounded-2xl
+            border border-white/[0.08]
+            bg-white/[0.03]
+            text-4xl
+          "
+        >
+          🎬
+        </div>
 
-        <p className="text-red-400 text-xl text-center">
+        <p className="mb-6 text-center text-lg text-red-400">
           {error || "Movie not found."}
         </p>
 
         <Link
           to="/"
-          className="px-6 py-3 bg-red-600 rounded-lg hover:bg-red-700 transition"
+          className="
+            inline-flex items-center gap-2
+            rounded-xl
+            bg-red-600
+            px-6 py-3
+            text-sm font-semibold
+            text-white
+            shadow-lg shadow-red-950/30
+            transition
+            hover:bg-red-500
+          "
         >
-          ← Back Home
+          <ArrowLeft size={17} />
+          Back Home
         </Link>
       </main>
     );
@@ -120,57 +177,175 @@ function MovieDetails() {
     : "N/A";
 
   return (
-    <main className="min-h-screen bg-black text-white">
-      {/* ================= HERO ================= */}
-      <section className="relative min-h-[750px] overflow-hidden">
+    <main className="min-h-screen bg-[#07070a] text-white">
+      {/* ================================================= */}
+      {/* HERO */}
+      {/* ================================================= */}
+
+      <section className="relative min-h-[720px] overflow-hidden">
         {/* Backdrop */}
         {backdropUrl && (
           <>
             <img
               src={backdropUrl}
               alt=""
-              className="absolute inset-0 w-full h-full object-cover scale-105 blur-sm"
+              className="
+                absolute inset-0
+                h-full w-full
+                scale-105
+                object-cover
+                opacity-50
+              "
             />
 
-            <div className="absolute inset-0 bg-black/60" />
+            {/* Blur */}
+            <div className="absolute inset-0 backdrop-blur-[2px]" />
 
-            <div className="absolute inset-0 bg-gradient-to-r from-black via-black/85 to-black/40" />
+            {/* Left gradient */}
+            <div
+              className="
+                absolute inset-0
+                bg-gradient-to-r
+                from-[#07070a]
+                via-[#07070a]/95
+                to-[#07070a]/35
+              "
+            />
 
-            <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-black/30" />
+            {/* Bottom gradient */}
+            <div
+              className="
+                absolute inset-0
+                bg-gradient-to-t
+                from-[#07070a]
+                via-transparent
+                to-[#07070a]/40
+              "
+            />
+
+            {/* Cinematic red glow */}
+            <div
+              className="
+                absolute
+                -left-40
+                top-40
+                h-96
+                w-96
+                rounded-full
+                bg-red-600/10
+                blur-[120px]
+              "
+            />
           </>
         )}
 
-        <div className="relative max-w-7xl mx-auto px-5 sm:px-8 py-10 md:py-16">
+        {/* Content */}
+        <div
+          className="
+            relative z-10
+            mx-auto
+            max-w-[1600px]
+            px-5
+            py-8
+            sm:px-8
+            lg:px-12
+            lg:py-12
+          "
+        >
           {/* Back */}
           <Link
             to="/"
-            className="inline-flex items-center gap-2 text-gray-300 hover:text-white transition mb-10"
+            className="
+              mb-10
+              inline-flex
+              items-center
+              gap-2
+
+              text-sm
+              font-medium
+              text-zinc-400
+
+              transition
+
+              hover:text-white
+            "
           >
-            <span className="text-xl">←</span>
+            <ArrowLeft size={18} />
             Back to Movies
           </Link>
 
-          <div className="grid lg:grid-cols-[320px_1fr] gap-10 lg:gap-14 items-center">
+          {/* Main */}
+          <div
+            className="
+              grid
+              items-center
+              gap-10
+
+              lg:grid-cols-[300px_1fr]
+              lg:gap-14
+              xl:grid-cols-[340px_1fr]
+            "
+          >
             {/* Poster */}
             <div className="flex justify-center lg:block">
               {posterUrl ? (
-                <img
-                  src={posterUrl}
-                  alt={movie.title}
-                  className="
-                    w-[240px]
-                    sm:w-[280px]
-                    lg:w-full
-                    rounded-2xl
-                    shadow-2xl
-                    shadow-black
-                    hover:scale-[1.02]
-                    transition
-                    duration-500
-                  "
-                />
+                <div className="group relative">
+                  <div
+                    className="
+                      absolute
+                      -inset-2
+                      rounded-3xl
+                      bg-red-600/10
+                      opacity-0
+                      blur-2xl
+                      transition
+                      duration-500
+                      group-hover:opacity-100
+                    "
+                  />
+
+                  <img
+                    src={posterUrl}
+                    alt={movie.title}
+                    className="
+                      relative
+                      w-[240px]
+                      rounded-2xl
+
+                      border
+                      border-white/[0.1]
+
+                      shadow-2xl
+                      shadow-black/80
+
+                      transition
+                      duration-500
+
+                      group-hover:scale-[1.02]
+
+                      sm:w-[280px]
+                      lg:w-full
+                    "
+                  />
+                </div>
               ) : (
-                <div className="w-[280px] h-[420px] bg-gray-900 rounded-2xl flex items-center justify-center text-gray-500">
+                <div
+                  className="
+                    flex
+                    h-[420px]
+                    w-[280px]
+                    items-center
+                    justify-center
+
+                    rounded-2xl
+                    border
+                    border-white/[0.08]
+                    bg-white/[0.03]
+
+                    text-sm
+                    text-zinc-600
+                  "
+                >
                   No Poster Available
                 </div>
               )}
@@ -178,56 +353,154 @@ function MovieDetails() {
 
             {/* Details */}
             <div className="max-w-4xl">
-              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black leading-tight mb-5">
+              {/* Small label */}
+              <div className="mb-4 flex items-center gap-2">
+                <span className="h-1.5 w-1.5 rounded-full bg-red-500 shadow-lg shadow-red-500/60" />
+
+                <span
+                  className="
+                    text-[10px]
+                    font-bold
+                    uppercase
+                    tracking-[0.25em]
+                    text-red-400
+                  "
+                >
+                  Movie Details
+                </span>
+              </div>
+
+              {/* Title */}
+              <h1
+                className="
+                  text-4xl
+                  font-black
+                  leading-[1.05]
+                  tracking-tight
+
+                  sm:text-5xl
+                  lg:text-6xl
+                  xl:text-7xl
+                "
+              >
                 {movie.title}
               </h1>
 
+              {/* Tagline */}
               {movie.tagline && (
-                <p className="text-gray-400 italic text-lg sm:text-xl mb-7">
-                  "{movie.tagline}"
+                <p
+                  className="
+                    mt-5
+                    max-w-2xl
+
+                    text-base
+                    italic
+                    leading-7
+                    text-zinc-500
+
+                    sm:text-lg
+                  "
+                >
+                  “{movie.tagline}”
                 </p>
               )}
 
               {/* Meta */}
-              <div className="flex flex-wrap items-center gap-3 mb-7">
-                <div className="flex items-center gap-2 bg-yellow-500/10 border border-yellow-500/30 px-4 py-2 rounded-lg">
-                  <span className="text-yellow-400 text-xl">★</span>
+              <div className="mt-7 flex flex-wrap items-center gap-3">
+                {/* Rating */}
+                <div
+                  className="
+                    flex items-center gap-2
+                    rounded-xl
+
+                    border
+                    border-yellow-500/20
+
+                    bg-yellow-500/[0.06]
+
+                    px-4 py-2.5
+                  "
+                >
+                  <Star size={18} className="fill-yellow-400 text-yellow-400" />
 
                   <div>
-                    <p className="font-bold text-yellow-400">
+                    <p className="text-sm font-bold text-yellow-400">
                       {movie.vote_average.toFixed(1)}
                     </p>
 
-                    <p className="text-xs text-gray-500">Rating</p>
+                    <p className="text-[10px] text-zinc-600">Rating</p>
                   </div>
                 </div>
 
-                <span className="px-4 py-2 bg-white/10 rounded-lg">
-                  📅 {releaseYear}
-                </span>
+                {/* Year */}
+                <div
+                  className="
+                    flex items-center gap-2
+                    rounded-xl
 
-                <span className="px-4 py-2 bg-white/10 rounded-lg">
-                  ⏱️ {runtimeText}
-                </span>
+                    border
+                    border-white/[0.07]
+
+                    bg-white/[0.04]
+
+                    px-4 py-3
+
+                    text-sm
+                    text-zinc-300
+                  "
+                >
+                  <CalendarDays size={16} className="text-zinc-500" />
+
+                  {releaseYear}
+                </div>
+
+                {/* Runtime */}
+                <div
+                  className="
+                    flex items-center gap-2
+                    rounded-xl
+
+                    border
+                    border-white/[0.07]
+
+                    bg-white/[0.04]
+
+                    px-4 py-3
+
+                    text-sm
+                    text-zinc-300
+                  "
+                >
+                  <Clock3 size={16} className="text-zinc-500" />
+
+                  {runtimeText}
+                </div>
               </div>
 
               {/* Genres */}
-              <div className="flex flex-wrap gap-2 mb-8">
+              <div className="mt-6 flex flex-wrap gap-2">
                 {movie.genres.map((genre) => (
                   <span
                     key={genre.id}
                     className="
-                      px-4
-                      py-1.5
                       rounded-full
-                      bg-red-600/20
+
                       border
-                      border-red-500/30
+                      border-red-500/15
+
+                      bg-red-500/[0.07]
+
+                      px-3.5
+                      py-1.5
+
+                      text-xs
+                      font-medium
                       text-red-300
-                      text-sm
-                      hover:bg-red-600
-                      hover:text-white
+
                       transition
+
+                      hover:border-red-500/30
+                      hover:bg-red-500/15
                     "
                   >
                     {genre.name}
@@ -236,53 +509,91 @@ function MovieDetails() {
               </div>
 
               {/* Overview */}
-              <div className="mb-8">
-                <h2 className="text-2xl font-bold mb-3">Overview</h2>
+              <div className="mt-8">
+                <h2 className="mb-3 text-xl font-bold">Overview</h2>
 
-                <p className="text-gray-300 leading-8 text-base sm:text-lg max-w-3xl">
+                <p
+                  className="
+                    max-w-3xl
+
+                    text-sm
+                    leading-7
+                    text-zinc-400
+
+                    sm:text-base
+                    sm:leading-8
+                  "
+                >
                   {movie.overview || "No overview available."}
                 </p>
               </div>
 
               {/* Buttons */}
-              <div className="flex flex-wrap gap-4">
+              <div className="mt-8 flex flex-wrap gap-3">
                 {/* Trailer */}
                 <button
                   type="button"
-                  onClick={handleWatchTrailer}
-                  disabled={trailerLoading}
-                  className="
-                    px-6
-                    py-3
-                    bg-red-600
-                    hover:bg-red-700
-                    disabled:bg-red-900
-                    disabled:cursor-not-allowed
-                    rounded-lg
-                    font-semibold
-                    transition
-                    hover:scale-105
-                  "
+                  onClick={handleFavorite}
+                  className={`
+    inline-flex
+    items-center
+    gap-2
+    rounded-xl
+    border
+    px-6
+    py-3
+    text-sm
+    font-semibold
+    backdrop-blur-md
+    transition
+    active:scale-95
+
+    ${
+      favorite
+        ? "border-red-500/30 bg-red-500/10 text-red-400 hover:bg-red-500/15"
+        : "border-white/[0.1] bg-white/[0.05] text-zinc-300 hover:bg-white/[0.09] hover:text-white"
+    }
+  `}
                 >
-                  {trailerLoading ? "Loading Trailer..." : "▶ Watch Trailer"}
+                  <Heart size={17} fill={favorite ? "currentColor" : "none"} />
+
+                  {favorite ? "Remove from Favorites" : "Add to Favorites"}
                 </button>
 
-                {/* Favorite - functionality next */}
+                {/* Favorite */}
                 <button
                   type="button"
                   className="
+                    inline-flex
+                    items-center
+                    gap-2
+
+                    rounded-xl
+
+                    border
+                    border-white/[0.1]
+
+                    bg-white/[0.05]
+
                     px-6
                     py-3
-                    bg-white/10
-                    hover:bg-white/20
-                    border
-                    border-white/10
-                    rounded-lg
+
+                    text-sm
                     font-semibold
+                    text-zinc-300
+
+                    backdrop-blur-md
+
                     transition
+
+                    hover:bg-white/[0.09]
+                    hover:text-white
+
+                    active:scale-95
                   "
                 >
-                  ♡ Add to Favorites
+                  <Heart size={17} />
+                  Add to Favorites
                 </button>
               </div>
             </div>
@@ -290,66 +601,77 @@ function MovieDetails() {
         </div>
       </section>
 
-      {/* ================= MOVIE INFORMATION ================= */}
-      <section className="max-w-7xl mx-auto px-5 sm:px-8 py-14">
-        <h2 className="text-2xl sm:text-3xl font-bold mb-8">
-          Movie Information
-        </h2>
+      {/* ================================================= */}
+      {/* MOVIE INFORMATION */}
+      {/* ================================================= */}
 
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
-          <div className="bg-white/[0.04] border border-white/10 rounded-xl p-5">
-            <p className="text-gray-500 text-sm mb-2">Release Date</p>
-            <p className="text-lg font-semibold">
-              {movie.release_date || "N/A"}
+      <section className="relative px-5 pb-16 sm:px-8 lg:px-12">
+        <div className="mx-auto max-w-[1600px]">
+          {/* Heading */}
+          <div className="mb-7">
+            <p
+              className="
+                mb-2
+                text-[10px]
+                font-bold
+                uppercase
+                tracking-[0.25em]
+                text-red-400
+              "
+            >
+              Details
             </p>
+
+            <h2 className="text-2xl font-black sm:text-3xl">
+              Movie Information
+            </h2>
           </div>
 
-          <div className="bg-white/[0.04] border border-white/10 rounded-xl p-5">
-            <p className="text-gray-500 text-sm mb-2">Runtime</p>
-            <p className="text-lg font-semibold">{runtimeText}</p>
-          </div>
+          {/* Cards */}
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <InfoCard
+              label="Release Date"
+              value={movie.release_date || "N/A"}
+            />
 
-          <div className="bg-white/[0.04] border border-white/10 rounded-xl p-5">
-            <p className="text-gray-500 text-sm mb-2">Vote Count</p>
-            <p className="text-lg font-semibold">
-              {movie.vote_count.toLocaleString()}
-            </p>
-          </div>
+            <InfoCard label="Runtime" value={runtimeText} />
 
-          <div className="bg-white/[0.04] border border-white/10 rounded-xl p-5">
-            <p className="text-gray-500 text-sm mb-2">Popularity</p>
-            <p className="text-lg font-semibold">
-              {movie.popularity.toFixed(0)}
-            </p>
-          </div>
+            <InfoCard
+              label="Vote Count"
+              value={movie.vote_count.toLocaleString()}
+            />
 
-          <div className="bg-white/[0.04] border border-white/10 rounded-xl p-5">
-            <p className="text-gray-500 text-sm mb-2">Original Language</p>
-            <p className="text-lg font-semibold uppercase">
-              {movie.original_language || "N/A"}
-            </p>
-          </div>
+            <InfoCard label="Popularity" value={movie.popularity.toFixed(0)} />
 
-          <div className="bg-white/[0.04] border border-white/10 rounded-xl p-5">
-            <p className="text-gray-500 text-sm mb-2">Status</p>
-            <p className="text-lg font-semibold">{movie.status || "N/A"}</p>
+            <InfoCard
+              label="Original Language"
+              value={
+                movie.original_language
+                  ? movie.original_language.toUpperCase()
+                  : "N/A"
+              }
+            />
+
+            <InfoCard label="Status" value={movie.status || "N/A"} />
           </div>
         </div>
       </section>
 
-      {/* ================= TRAILER MODAL ================= */}
+      {/* ================================================= */}
+      {/* TRAILER MODAL */}
+      {/* ================================================= */}
+
       {showTrailer && trailerKey && (
         <div
           className="
-            fixed
-            inset-0
-            z-50
+            fixed inset-0 z-[100]
+
+            flex items-center justify-center
+
             bg-black/90
-            backdrop-blur-sm
-            flex
-            items-center
-            justify-center
             p-4
+
+            backdrop-blur-md
           "
           onClick={() => setShowTrailer(false)}
         >
@@ -357,50 +679,124 @@ function MovieDetails() {
             className="
               relative
               w-full
-              max-w-5xl
-              aspect-video
-              bg-black
-              rounded-xl
+              max-w-6xl
+
               overflow-hidden
+              rounded-2xl
+
+              border
+              border-white/[0.1]
+
+              bg-black
+
               shadow-2xl
+              shadow-black
             "
             onClick={(event) => event.stopPropagation()}
           >
             {/* Close */}
             <button
               type="button"
-              onClick={() => setShowTrailer(false)}
+              onClick={handleWatchTrailer}
+              disabled={trailerLoading}
               className="
-                absolute
-                top-3
-                right-3
-                z-10
-                w-10
-                h-10
-                rounded-full
-                bg-black/80
-                text-white
-                text-xl
-                hover:bg-red-600
-                transition
-              "
+    inline-flex
+    items-center
+    gap-2
+    rounded-xl
+    bg-red-600
+    px-6
+    py-3
+    text-sm
+    font-bold
+    text-white
+    transition
+    hover:bg-red-500
+    disabled:cursor-not-allowed
+    disabled:opacity-50
+  "
             >
-              ✕
+              <Play size={17} className="fill-current" />
+
+              {trailerLoading ? "Loading Trailer..." : "Watch Trailer"}
             </button>
 
             {/* YouTube */}
-            <iframe
-              className="w-full h-full"
-              src={`https://www.youtube.com/embed/${trailerKey}?autoplay=1`}
-              title={`${movie.title} Trailer`}
-              allow="autoplay; encrypted-media; picture-in-picture"
-              allowFullScreen
-            />
+            <div className="aspect-video">
+              <iframe
+                className="h-full w-full"
+                src={`https://www.youtube.com/embed/${trailerKey}?autoplay=1`}
+                title={`${movie.title} Trailer`}
+                allow="autoplay; encrypted-media; picture-in-picture"
+                allowFullScreen
+              />
+            </div>
           </div>
         </div>
       )}
     </main>
   );
 }
+
+/* ================================================= */
+/* INFO CARD */
+/* ================================================= */
+
+interface InfoCardProps {
+  label: string;
+  value: string;
+}
+
+const InfoCard = ({ label, value }: InfoCardProps) => {
+  return (
+    <div
+      className="
+        group
+
+        rounded-2xl
+
+        border
+        border-white/[0.06]
+
+        bg-white/[0.025]
+
+        p-5
+
+        transition-all
+        duration-300
+
+        hover:border-white/[0.1]
+        hover:bg-white/[0.04]
+      "
+    >
+      <p
+        className="
+          mb-2
+          text-[10px]
+          font-bold
+          uppercase
+          tracking-[0.18em]
+          text-zinc-600
+        "
+      >
+        {label}
+      </p>
+
+      <p
+        className="
+          text-lg
+          font-semibold
+          text-zinc-200
+
+          transition
+
+          group-hover:text-white
+        "
+      >
+        {value}
+      </p>
+    </div>
+  );
+};
 
 export default MovieDetails;
