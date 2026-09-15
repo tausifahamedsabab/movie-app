@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import { Search as SearchIcon, Film } from "lucide-react";
+import { Search as SearchIcon, Film, Sparkles } from "lucide-react";
 
 import type { IMovie } from "../../types/movie";
 import { searchMovies } from "../../services/movieApi";
@@ -20,6 +20,7 @@ const Search = () => {
     const fetchSearchResults = async () => {
       if (!query) {
         setMovies([]);
+        setError("");
         return;
       }
 
@@ -30,8 +31,10 @@ const Search = () => {
         const data = await searchMovies(query);
 
         setMovies(data);
-      } catch {
-        setError("Failed to search movies");
+      } catch (err) {
+        console.error(err);
+        setError("Failed to search movies.");
+        setMovies([]);
       } finally {
         setLoading(false);
       }
@@ -46,8 +49,20 @@ const Search = () => {
 
   if (error) {
     return (
-      <div className="flex min-h-[60vh] items-center justify-center">
-        <p className="text-red-400">{error}</p>
+      <div className="min-h-screen text-white">
+        <div className="mx-auto flex min-h-[60vh] max-w-[1600px] items-center justify-center px-5">
+          <div className="text-center">
+            <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-2xl border border-red-500/10 bg-red-500/10 text-red-400">
+              <SearchIcon size={27} />
+            </div>
+
+            <h2 className="text-xl font-bold text-white">
+              Something went wrong
+            </h2>
+
+            <p className="mt-2 text-sm text-red-400">{error}</p>
+          </div>
+        </div>
       </div>
     );
   }
@@ -60,14 +75,10 @@ const Search = () => {
           <div className="mb-4 flex items-center gap-3">
             <div
               className="
-                flex
-                h-11
-                w-11
-                items-center
-                justify-center
+                flex h-11 w-11
+                items-center justify-center
                 rounded-xl
-                border
-                border-red-500/10
+                border border-red-500/10
                 bg-red-500/10
                 text-red-400
               "
@@ -97,6 +108,7 @@ const Search = () => {
                   tracking-tight
                   text-white
                   sm:text-4xl
+                  lg:text-5xl
                 "
               >
                 Search Results
@@ -116,88 +128,108 @@ const Search = () => {
                   tracking-tight
                   text-white
                   sm:text-4xl
+                  lg:text-5xl
                 "
               >
                 Search Movies
               </h1>
 
               <p className="mt-3 max-w-xl text-sm leading-6 text-zinc-600 sm:text-base">
-                Search for your favorite movies using the search bar above.
+                Find movies, explore their details, and build your personal
+                collection.
               </p>
             </>
           )}
         </div>
 
-        {/* No query */}
+        {/* Empty search */}
         {!query && (
           <div
             className="
-              flex
-              min-h-[350px]
+              relative
+              flex min-h-[420px]
               flex-col
               items-center
               justify-center
-
+              overflow-hidden
               rounded-3xl
-              border
-              border-white/[0.06]
+              border border-white/[0.06]
               bg-white/[0.02]
-
               px-6
               text-center
             "
           >
+            {/* Glow */}
             <div
               className="
-                mb-5
-                flex
-                h-16
-                w-16
-                items-center
-                justify-center
+                pointer-events-none
+                absolute
+                left-1/2
+                top-1/2
+                h-64
+                w-64
+                -translate-x-1/2
+                -translate-y-1/2
+                rounded-full
+                bg-red-600/[0.06]
+                blur-[100px]
+              "
+            />
 
+            <div
+              className="
+                relative
+                mb-6
+                flex h-20 w-20
+                items-center justify-center
                 rounded-2xl
-                bg-red-500/10
+                border border-white/[0.06]
+                bg-white/[0.04]
                 text-red-400
               "
             >
-              <SearchIcon size={28} />
+              <SearchIcon size={34} />
             </div>
 
-            <h2 className="text-xl font-bold text-white">
+            <h2 className="relative text-2xl font-black text-white">
               What are you looking for?
             </h2>
 
-            <p className="mt-2 max-w-md text-sm leading-6 text-zinc-600">
-              Enter a movie name in the search bar to discover movies and
-              explore their details.
+            <p className="relative mt-3 max-w-md text-sm leading-7 text-zinc-600">
+              Search for a movie using the search bar above and discover your
+              next favorite film.
             </p>
+
+            <div className="relative mt-7 flex items-center gap-2 text-xs text-zinc-700">
+              <Sparkles size={14} />
+              <span>Try searching for a movie title</span>
+            </div>
           </div>
         )}
 
         {/* Results */}
         {query && movies.length > 0 && (
           <>
-            <div className="mb-7 flex items-center gap-3">
+            <div className="mb-7 flex flex-wrap items-center gap-3">
               <span
                 className="
+                  flex items-center gap-2
                   rounded-lg
-                  border
-                  border-white/[0.06]
+                  border border-white/[0.06]
                   bg-white/[0.03]
-                  px-3
-                  py-1.5
+                  px-3 py-1.5
                   text-xs
-                  text-zinc-500
+                  text-zinc-400
                 "
               >
-                {movies.length} results
+                <Film size={13} />
+                {movies.length} {movies.length === 1 ? "movie" : "movies"}
               </span>
 
               <span className="h-1 w-1 rounded-full bg-zinc-700" />
 
               <span className="text-xs text-zinc-600">
-                Movies matching your search
+                Matching your search
               </span>
             </div>
 
@@ -209,44 +241,61 @@ const Search = () => {
         {query && movies.length === 0 && (
           <div
             className="
-              flex
-              min-h-[350px]
+              relative
+              flex min-h-[420px]
               flex-col
               items-center
               justify-center
-
+              overflow-hidden
               rounded-3xl
-              border
-              border-white/[0.06]
+              border border-white/[0.06]
               bg-white/[0.02]
-
               px-6
               text-center
             "
           >
             <div
               className="
-                mb-5
-                flex
-                h-16
-                w-16
-                items-center
-                justify-center
+                pointer-events-none
+                absolute
+                left-1/2
+                top-1/2
+                h-56
+                w-56
+                -translate-x-1/2
+                -translate-y-1/2
+                rounded-full
+                bg-white/[0.02]
+                blur-[80px]
+              "
+            />
 
+            <div
+              className="
+                relative
+                mb-6
+                flex h-20 w-20
+                items-center justify-center
                 rounded-2xl
+                border border-white/[0.06]
                 bg-white/[0.04]
                 text-zinc-600
               "
             >
-              <Film size={28} />
+              <Film size={34} />
             </div>
 
-            <h2 className="text-xl font-bold text-white">No movies found</h2>
+            <h2 className="relative text-2xl font-black text-white">
+              No movies found
+            </h2>
 
-            <p className="mt-2 max-w-md text-sm leading-6 text-zinc-600">
+            <p className="relative mt-3 max-w-md text-sm leading-7 text-zinc-600">
               We couldn't find any movies matching{" "}
-              <span className="text-zinc-400">"{query}"</span>. Try searching
-              with a different title.
+              <span className="font-semibold text-zinc-400">"{query}"</span>.
+            </p>
+
+            <p className="relative mt-2 text-xs text-zinc-700">
+              Try a different movie title.
             </p>
           </div>
         )}

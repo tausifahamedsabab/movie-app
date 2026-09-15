@@ -7,12 +7,15 @@ import {
   CalendarDays,
   Heart,
   X,
-  Menu,
   ChevronRight,
 } from "lucide-react";
-import { useState } from "react";
 
 import { useFavorites } from "../../context/useFavorites";
+
+interface SidebarProps {
+  isOpen: boolean;
+  onClose: () => void;
+}
 
 const menuItems = [
   {
@@ -58,56 +61,31 @@ const genres = [
   { name: "Sci-Fi", id: 878 },
 ];
 
-const Sidebar = () => {
-  const [open, setOpen] = useState(false);
-
+const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
   const { favorites } = useFavorites();
 
   return (
     <>
-      {/* Mobile Menu Button */}
-      <button
-        onClick={() => setOpen(true)}
-        className="
-          fixed left-4 top-[88px] z-40
-          flex h-11 w-11
-          items-center justify-center
-
-          rounded-xl
-          border border-white/[0.08]
-          bg-[#0c0c10]/90
-          text-zinc-300
-
-          shadow-xl
-          backdrop-blur-xl
-
-          transition
-          hover:bg-white/[0.08]
-          hover:text-white
-
-          lg:hidden
-        "
-      >
-        <Menu size={21} />
-      </button>
-
-      {/* Overlay */}
-      {open && (
-        <div
-          onClick={() => setOpen(false)}
+      {/* Mobile Overlay */}
+      {isOpen && (
+        <button
+          onClick={onClose}
           className="
-            fixed inset-0 z-40
+            fixed inset-0
+            top-[72px]
+            z-30
             bg-black/70
             backdrop-blur-sm
             lg:hidden
           "
+          aria-label="Close sidebar"
         />
       )}
 
       {/* Sidebar */}
       <aside
         className={`
-          fixed left-0 top-[72px] z-50
+          fixed left-0 top-[72px] z-40
 
           h-[calc(100vh-72px)]
           w-64
@@ -121,7 +99,7 @@ const Sidebar = () => {
 
           lg:translate-x-0
 
-          ${open ? "translate-x-0" : "-translate-x-full"}
+          ${isOpen ? "translate-x-0" : "-translate-x-full"}
         `}
       >
         <div className="flex h-full flex-col overflow-y-auto px-4 py-6">
@@ -136,7 +114,7 @@ const Sidebar = () => {
             </div>
 
             <button
-              onClick={() => setOpen(false)}
+              onClick={onClose}
               className="
                 flex h-9 w-9 items-center justify-center
                 rounded-lg
@@ -145,6 +123,7 @@ const Sidebar = () => {
                 hover:bg-white/[0.06]
                 hover:text-white
               "
+              aria-label="Close menu"
             >
               <X size={19} />
             </button>
@@ -174,7 +153,7 @@ const Sidebar = () => {
                     key={item.path}
                     to={item.path}
                     end={item.path === "/"}
-                    onClick={() => setOpen(false)}
+                    onClick={onClose}
                     className={({ isActive }) =>
                       `
                       group relative
@@ -293,7 +272,7 @@ const Sidebar = () => {
                 <NavLink
                   key={genre.id}
                   to={`/genre/${genre.id}`}
-                  onClick={() => setOpen(false)}
+                  onClick={onClose}
                   className={({ isActive }) =>
                     `
                     flex items-center
