@@ -1,39 +1,49 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Footer from "./components/Footer/Footer";
+import { Routes, Route } from "react-router-dom";
+
+import Genre from "./pages/Genre/Genre";
 import Navbar from "./components/Navbar/Navbar";
 import Sidebar from "./components/Sidebar/Sidebar";
-
-import Home from "./pages/Home/Home";
-import Search from "./components/SearchBar/SearchBar";
 import MovieDetails from "./pages/MovieDetails/MovieDetails";
 
-function App() {
+import Home from "./pages/Home/Home";
+import Search from "./pages/Search/Search";
+import Trending from "./pages/Trending/Trending";
+import TopRated from "./pages/TopRated/TopRated";
+import Upcoming from "./pages/Upcoming/Upcoming";
+import Favorites from "./pages/Favorites/Favorites";
+
+const App = () => {
   return (
-    <BrowserRouter>
+    <div className="min-h-screen bg-[#09090b]">
+      {/* Navbar */}
       <Navbar />
 
-      <div className="flex">
-        {/* Sidebar */}
-        <Sidebar />
+      {/* Sidebar */}
+      <Sidebar />
 
-        {/* Main Content */}
-        <main className="min-h-screen flex-1">
-          <Routes>
-            {/* Home page */}
-            <Route path="/" element={<Home />} />
+      {/* Main Content */}
+      <main className="min-h-screen p-6 lg:ml-64">
+        <Routes>
+          <Route path="/" element={<Home />} />
 
-            {/* Search page */}
-            <Route path="/search" element={<Search />} />
+          <Route path="/genre/:id" element={<Genre />} />
 
-            {/* Movie details page */}
-            <Route path="/movie/:id" element={<MovieDetails />} />
-          </Routes>
-        </main>
-      </div>
+          <Route path="/search" element={<Search />} />
 
-      <Footer />
-    </BrowserRouter>
+          <Route path="/trending" element={<Trending />} />
+
+          <Route path="/top-rated" element={<TopRated />} />
+
+          <Route path="/upcoming" element={<Upcoming />} />
+
+          <Route path="/favorites" element={<Favorites />} />
+
+          {/* Movie Details */}
+          <Route path="/movie/:id" element={<MovieDetails />} />
+        </Routes>
+      </main>
+    </div>
   );
-}
+};
 
 export default App;

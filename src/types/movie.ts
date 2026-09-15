@@ -15,6 +15,13 @@ export interface IMovieDetails extends IMovie {
     id: number;
     name: string;
   }[];
+
   runtime: number | null;
   tagline: string | null;
+
+  // Additional TMDB movie details
+  vote_count: number;
+  popularity: number;
+  original_language: string;
+  status: string;
 }
