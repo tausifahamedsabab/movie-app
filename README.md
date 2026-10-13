@@ -32,9 +32,9 @@ MovieHub is a modern movie discovery web application built with React, TypeScrip
 
 ## 📸 Screenshots
 
-### Home Page ![MovieHub Homepage](./screenshots/homepage.png)
+### Home Page ![MovieHub Homepage](/screenshots/homepage.png)
 
-### Movie Details ![MovieHub Movie Details](./screenshots/movie-details.png)
+### Movie Details ![MovieHub Movie Details](/screenshots/movie-details.png)
 
 ### Home Page
 
