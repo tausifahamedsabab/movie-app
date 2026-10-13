@@ -8,6 +8,7 @@ import {
   Heart,
   Play,
   Star,
+  X,
 } from "lucide-react";
 
 import { getMovieDetails, getMovieTrailer } from "../../services/movieApi";
@@ -25,14 +26,16 @@ function MovieDetails() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  const favorite = movie ? isFavorite(movie.id) : false;
-
-  // Trailer
   const [trailerKey, setTrailerKey] = useState<string | null>(null);
   const [showTrailer, setShowTrailer] = useState(false);
   const [trailerLoading, setTrailerLoading] = useState(false);
 
-  // Fetch movie details
+  const favorite = movie ? isFavorite(movie.id) : false;
+
+  /* ============================= */
+  /* FETCH MOVIE */
+  /* ============================= */
+
   useEffect(() => {
     const fetchMovieDetails = async () => {
       if (!id) {
@@ -59,7 +62,10 @@ function MovieDetails() {
     fetchMovieDetails();
   }, [id]);
 
-  // Trailer
+  /* ============================= */
+  /* FAVORITE */
+  /* ============================= */
+
   const handleFavorite = () => {
     if (!movie) return;
 
@@ -78,6 +84,11 @@ function MovieDetails() {
       });
     }
   };
+
+  /* ============================= */
+  /* TRAILER */
+  /* ============================= */
+
   const handleWatchTrailer = async () => {
     if (!id) return;
 
@@ -101,7 +112,10 @@ function MovieDetails() {
     }
   };
 
-  // Loading
+  /* ============================= */
+  /* LOADING */
+  /* ============================= */
+
   if (loading) {
     return (
       <main className="flex min-h-screen items-center justify-center bg-[#07070a]">
@@ -114,7 +128,10 @@ function MovieDetails() {
     );
   }
 
-  // Error
+  /* ============================= */
+  /* ERROR */
+  /* ============================= */
+
   if (error || !movie) {
     return (
       <main className="flex min-h-screen flex-col items-center justify-center bg-[#07070a] px-5 text-white">
@@ -147,6 +164,7 @@ function MovieDetails() {
             shadow-lg shadow-red-950/30
             transition
             hover:bg-red-500
+            active:scale-95
           "
         >
           <ArrowLeft size={17} />
@@ -155,6 +173,10 @@ function MovieDetails() {
       </main>
     );
   }
+
+  /* ============================= */
+  /* DATA */
+  /* ============================= */
 
   const backdropUrl = movie.backdrop_path
     ? `https://image.tmdb.org/t/p/original${movie.backdrop_path}`
@@ -178,9 +200,9 @@ function MovieDetails() {
 
   return (
     <main className="min-h-screen bg-[#07070a] text-white">
-      {/* ================================================= */}
+      {/* ======================================= */}
       {/* HERO */}
-      {/* ================================================= */}
+      {/* ======================================= */}
 
       <section className="relative min-h-[720px] overflow-hidden">
         {/* Backdrop */}
@@ -194,7 +216,7 @@ function MovieDetails() {
                 h-full w-full
                 scale-105
                 object-cover
-                opacity-50
+                opacity-45
               "
             />
 
@@ -208,7 +230,7 @@ function MovieDetails() {
                 bg-gradient-to-r
                 from-[#07070a]
                 via-[#07070a]/95
-                to-[#07070a]/35
+                to-[#07070a]/30
               "
             />
 
@@ -218,12 +240,23 @@ function MovieDetails() {
                 absolute inset-0
                 bg-gradient-to-t
                 from-[#07070a]
-                via-transparent
-                to-[#07070a]/40
+                via-[#07070a]/30
+                to-[#07070a]/50
               "
             />
 
-            {/* Cinematic red glow */}
+            {/* Top gradient */}
+            <div
+              className="
+                absolute inset-0
+                bg-gradient-to-b
+                from-[#07070a]/60
+                via-transparent
+                to-transparent
+              "
+            />
+
+            {/* Red glow */}
             <div
               className="
                 absolute
@@ -246,10 +279,12 @@ function MovieDetails() {
             mx-auto
             max-w-[1600px]
             px-5
-            py-8
+            pb-16
+            pt-8
             sm:px-8
             lg:px-12
-            lg:py-12
+            lg:pb-24
+            lg:pt-12
           "
         >
           {/* Back */}
@@ -260,13 +295,14 @@ function MovieDetails() {
               inline-flex
               items-center
               gap-2
-
+              rounded-lg
+              px-2
+              py-1
               text-sm
               font-medium
               text-zinc-400
-
               transition
-
+              hover:bg-white/[0.04]
               hover:text-white
             "
           >
@@ -280,23 +316,26 @@ function MovieDetails() {
               grid
               items-center
               gap-10
-
               lg:grid-cols-[300px_1fr]
               lg:gap-14
               xl:grid-cols-[340px_1fr]
             "
           >
-            {/* Poster */}
+            {/* ================================= */}
+            {/* POSTER */}
+            {/* ================================= */}
+
             <div className="flex justify-center lg:block">
               {posterUrl ? (
                 <div className="group relative">
+                  {/* Glow */}
                   <div
                     className="
                       absolute
-                      -inset-2
-                      rounded-3xl
-                      bg-red-600/10
-                      opacity-0
+                      -inset-3
+                      rounded-[28px]
+                      bg-red-600/15
+                      opacity-70
                       blur-2xl
                       transition
                       duration-500
@@ -311,20 +350,30 @@ function MovieDetails() {
                       relative
                       w-[240px]
                       rounded-2xl
-
                       border
-                      border-white/[0.1]
-
+                      border-white/[0.12]
+                      object-cover
                       shadow-2xl
                       shadow-black/80
-
                       transition
                       duration-500
-
-                      group-hover:scale-[1.02]
-
+                      group-hover:-translate-y-1
+                      group-hover:scale-[1.015]
                       sm:w-[280px]
                       lg:w-full
+                    "
+                  />
+
+                  {/* Poster bottom gradient */}
+                  <div
+                    className="
+                      pointer-events-none
+                      absolute inset-x-0 bottom-0
+                      h-24
+                      rounded-b-2xl
+                      bg-gradient-to-t
+                      from-black/40
+                      to-transparent
                     "
                   />
                 </div>
@@ -336,12 +385,10 @@ function MovieDetails() {
                     w-[280px]
                     items-center
                     justify-center
-
                     rounded-2xl
                     border
                     border-white/[0.08]
                     bg-white/[0.03]
-
                     text-sm
                     text-zinc-600
                   "
@@ -351,11 +398,23 @@ function MovieDetails() {
               )}
             </div>
 
-            {/* Details */}
+            {/* ================================= */}
+            {/* DETAILS */}
+            {/* ================================= */}
+
             <div className="max-w-4xl">
-              {/* Small label */}
+              {/* Label */}
               <div className="mb-4 flex items-center gap-2">
-                <span className="h-1.5 w-1.5 rounded-full bg-red-500 shadow-lg shadow-red-500/60" />
+                <span
+                  className="
+                    h-1.5
+                    w-1.5
+                    rounded-full
+                    bg-red-500
+                    shadow-lg
+                    shadow-red-500/60
+                  "
+                />
 
                 <span
                   className="
@@ -373,11 +432,11 @@ function MovieDetails() {
               {/* Title */}
               <h1
                 className="
+                  max-w-5xl
                   text-4xl
                   font-black
-                  leading-[1.05]
+                  leading-[1.02]
                   tracking-tight
-
                   sm:text-5xl
                   lg:text-6xl
                   xl:text-7xl
@@ -392,12 +451,10 @@ function MovieDetails() {
                   className="
                     mt-5
                     max-w-2xl
-
                     text-base
                     italic
                     leading-7
                     text-zinc-500
-
                     sm:text-lg
                   "
                 >
@@ -406,18 +463,14 @@ function MovieDetails() {
               )}
 
               {/* Meta */}
-              <div className="mt-7 flex flex-wrap items-center gap-3">
+              <div className="mt-7 flex flex-wrap items-center gap-2.5">
                 {/* Rating */}
                 <div
                   className="
                     flex items-center gap-2
                     rounded-xl
-
-                    border
-                    border-yellow-500/20
-
+                    border border-yellow-500/20
                     bg-yellow-500/[0.06]
-
                     px-4 py-2.5
                   "
                 >
@@ -437,20 +490,13 @@ function MovieDetails() {
                   className="
                     flex items-center gap-2
                     rounded-xl
-
-                    border
-                    border-white/[0.07]
-
+                    border border-white/[0.07]
                     bg-white/[0.04]
-
                     px-4 py-3
-
-                    text-sm
-                    text-zinc-300
+                    text-sm text-zinc-300
                   "
                 >
                   <CalendarDays size={16} className="text-zinc-500" />
-
                   {releaseYear}
                 </div>
 
@@ -459,20 +505,13 @@ function MovieDetails() {
                   className="
                     flex items-center gap-2
                     rounded-xl
-
-                    border
-                    border-white/[0.07]
-
+                    border border-white/[0.07]
                     bg-white/[0.04]
-
                     px-4 py-3
-
-                    text-sm
-                    text-zinc-300
+                    text-sm text-zinc-300
                   "
                 >
                   <Clock3 size={16} className="text-zinc-500" />
-
                   {runtimeText}
                 </div>
               </div>
@@ -484,21 +523,14 @@ function MovieDetails() {
                     key={genre.id}
                     className="
                       rounded-full
-
-                      border
-                      border-red-500/15
-
+                      border border-red-500/15
                       bg-red-500/[0.07]
-
                       px-3.5
                       py-1.5
-
                       text-xs
                       font-medium
                       text-red-300
-
                       transition
-
                       hover:border-red-500/30
                       hover:bg-red-500/15
                     "
@@ -515,11 +547,9 @@ function MovieDetails() {
                 <p
                   className="
                     max-w-3xl
-
                     text-sm
                     leading-7
                     text-zinc-400
-
                     sm:text-base
                     sm:leading-8
                   "
@@ -528,72 +558,81 @@ function MovieDetails() {
                 </p>
               </div>
 
-              {/* Buttons */}
+              {/* ================================= */}
+              {/* ACTION BUTTONS */}
+              {/* ================================= */}
+
               <div className="mt-8 flex flex-wrap gap-3">
                 {/* Trailer */}
                 <button
                   type="button"
-                  onClick={handleFavorite}
-                  className={`
-    inline-flex
-    items-center
-    gap-2
-    rounded-xl
-    border
-    px-6
-    py-3
-    text-sm
-    font-semibold
-    backdrop-blur-md
-    transition
-    active:scale-95
-
-    ${
-      favorite
-        ? "border-red-500/30 bg-red-500/10 text-red-400 hover:bg-red-500/15"
-        : "border-white/[0.1] bg-white/[0.05] text-zinc-300 hover:bg-white/[0.09] hover:text-white"
-    }
-  `}
+                  onClick={handleWatchTrailer}
+                  disabled={trailerLoading}
+                  className="
+                    inline-flex
+                    items-center
+                    gap-2
+                    rounded-xl
+                    bg-red-600
+                    px-6
+                    py-3
+                    text-sm
+                    font-bold
+                    text-white
+                    shadow-lg
+                    shadow-red-950/30
+                    transition
+                    hover:bg-red-500
+                    hover:shadow-red-900/40
+                    active:scale-95
+                    disabled:cursor-not-allowed
+                    disabled:opacity-60
+                  "
                 >
-                  <Heart size={17} fill={favorite ? "currentColor" : "none"} />
+                  <Play size={17} className="fill-current" />
 
-                  {favorite ? "Remove from Favorites" : "Add to Favorites"}
+                  {trailerLoading ? "Loading Trailer..." : "Watch Trailer"}
                 </button>
 
                 {/* Favorite */}
                 <button
                   type="button"
-                  className="
+                  onClick={handleFavorite}
+                  className={`
                     inline-flex
                     items-center
                     gap-2
-
                     rounded-xl
-
                     border
-                    border-white/[0.1]
-
-                    bg-white/[0.05]
-
                     px-6
                     py-3
-
                     text-sm
                     font-semibold
-                    text-zinc-300
-
                     backdrop-blur-md
-
                     transition
-
-                    hover:bg-white/[0.09]
-                    hover:text-white
-
                     active:scale-95
-                  "
+
+                    ${
+                      favorite
+                        ? `
+                          border-red-500/30
+                          bg-red-500/10
+                          text-red-400
+                          hover:bg-red-500/15
+                        `
+                        : `
+                          border-white/[0.1]
+                          bg-white/[0.05]
+                          text-zinc-300
+                          hover:bg-white/[0.09]
+                          hover:text-white
+                        `
+                    }
+                  `}
                 >
-                  <Heart size={17} />
-                  Add to Favorites
+                  <Heart size={17} fill={favorite ? "currentColor" : "none"} />
+
+                  {favorite ? "Remove from Favorites" : "Add to Favorites"}
                 </button>
               </div>
             </div>
@@ -601,13 +640,12 @@ function MovieDetails() {
         </div>
       </section>
 
-      {/* ================================================= */}
+      {/* ======================================= */}
       {/* MOVIE INFORMATION */}
-      {/* ================================================= */}
+      {/* ======================================= */}
 
-      <section className="relative px-5 pb-16 sm:px-8 lg:px-12">
+      <section className="relative px-5 pb-20 sm:px-8 lg:px-12">
         <div className="mx-auto max-w-[1600px]">
-          {/* Heading */}
           <div className="mb-7">
             <p
               className="
@@ -627,7 +665,6 @@ function MovieDetails() {
             </h2>
           </div>
 
-          {/* Cards */}
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             <InfoCard
               label="Release Date"
@@ -657,20 +694,17 @@ function MovieDetails() {
         </div>
       </section>
 
-      {/* ================================================= */}
+      {/* ======================================= */}
       {/* TRAILER MODAL */}
-      {/* ================================================= */}
+      {/* ======================================= */}
 
       {showTrailer && trailerKey && (
         <div
           className="
             fixed inset-0 z-[100]
-
             flex items-center justify-center
-
             bg-black/90
             p-4
-
             backdrop-blur-md
           "
           onClick={() => setShowTrailer(false)}
@@ -680,45 +714,42 @@ function MovieDetails() {
               relative
               w-full
               max-w-6xl
-
               overflow-hidden
               rounded-2xl
-
-              border
-              border-white/[0.1]
-
+              border border-white/[0.1]
               bg-black
-
               shadow-2xl
               shadow-black
             "
             onClick={(event) => event.stopPropagation()}
           >
-            {/* Close */}
+            {/* Close Button */}
             <button
               type="button"
-              onClick={handleWatchTrailer}
-              disabled={trailerLoading}
+              onClick={() => setShowTrailer(false)}
               className="
-    inline-flex
-    items-center
-    gap-2
-    rounded-xl
-    bg-red-600
-    px-6
-    py-3
-    text-sm
-    font-bold
-    text-white
-    transition
-    hover:bg-red-500
-    disabled:cursor-not-allowed
-    disabled:opacity-50
-  "
+                absolute
+                right-3
+                top-3
+                z-10
+                flex
+                h-10
+                w-10
+                items-center
+                justify-center
+                rounded-full
+                border
+                border-white/10
+                bg-black/70
+                text-white
+                backdrop-blur-md
+                transition
+                hover:bg-white/10
+                active:scale-95
+              "
+              aria-label="Close trailer"
             >
-              <Play size={17} className="fill-current" />
-
-              {trailerLoading ? "Loading Trailer..." : "Watch Trailer"}
+              <X size={19} />
             </button>
 
             {/* YouTube */}
@@ -738,9 +769,9 @@ function MovieDetails() {
   );
 }
 
-/* ================================================= */
+/* ================================= */
 /* INFO CARD */
-/* ================================================= */
+/* ================================= */
 
 interface InfoCardProps {
   label: string;
@@ -752,19 +783,14 @@ const InfoCard = ({ label, value }: InfoCardProps) => {
     <div
       className="
         group
-
         rounded-2xl
-
         border
         border-white/[0.06]
-
         bg-white/[0.025]
-
         p-5
-
         transition-all
         duration-300
-
+        hover:-translate-y-0.5
         hover:border-white/[0.1]
         hover:bg-white/[0.04]
       "
@@ -787,9 +813,7 @@ const InfoCard = ({ label, value }: InfoCardProps) => {
           text-lg
           font-semibold
           text-zinc-200
-
           transition
-
           group-hover:text-white
         "
       >

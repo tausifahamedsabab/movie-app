@@ -144,3 +144,16 @@ export const getMovieTrailer = async (
 
   return trailer ?? null;
 };
+export const getSimilarMovies = async (movieId: string): Promise<IMovie[]> => {
+  const response = await fetch(
+    `https://api.themoviedb.org/3/movie/${movieId}/similar?api_key=${API_KEY}`,
+  );
+
+  if (!response.ok) {
+    throw new Error("Failed to fetch similar movies");
+  }
+
+  const data = await response.json();
+
+  return data.results;
+};
