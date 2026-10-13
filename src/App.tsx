@@ -1,5 +1,9 @@
 import { useState } from "react";
 import { Routes, Route } from "react-router-dom";
+import Profile from "./pages/Profile/Profile";
+
+import Login from "./pages/Login/Login";
+import Signup from "./pages/Signup/Signup";
 
 import Genre from "./pages/Genre/Genre";
 import Navbar from "./components/Navbar/Navbar";
@@ -35,6 +39,9 @@ const App = () => {
             <Route path="/upcoming" element={<Upcoming />} />
             <Route path="/favorites" element={<Favorites />} />
             <Route path="/movie/:id" element={<MovieDetails />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/signup" element={<Signup />} />
+            <Route path="/profile" element={<Profile />} />
           </Routes>
         </main>
 

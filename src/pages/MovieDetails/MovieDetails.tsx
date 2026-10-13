@@ -3,6 +3,7 @@ import { Link, useParams } from "react-router-dom";
 
 import {
   ArrowLeft,
+  Bookmark,
   CalendarDays,
   Clock3,
   Heart,
@@ -10,6 +11,8 @@ import {
   Star,
   X,
 } from "lucide-react";
+
+import { useWatchlist } from "../../context/useWatchlist";
 
 import { getMovieDetails, getMovieTrailer } from "../../services/movieApi";
 
@@ -22,6 +25,8 @@ function MovieDetails() {
 
   const { addToFavorites, removeFromFavorites, isFavorite } = useFavorites();
 
+  const { addToWatchlist, removeFromWatchlist, isInWatchlist } = useWatchlist();
+
   const [movie, setMovie] = useState<IMovieDetails | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -31,6 +36,34 @@ function MovieDetails() {
   const [trailerLoading, setTrailerLoading] = useState(false);
 
   const favorite = movie ? isFavorite(movie.id) : false;
+  const watchlisted = movie ? isInWatchlist(movie.id) : false;
+
+  const handleWatchlist = () => {
+    if (!movie) return;
+
+    if (watchlisted) {
+      removeFromWatchlist(movie.id);
+    } else {
+      addToWatchlist({
+        id: movie.id,
+        title: movie.title,
+        overview: movie.overview,
+        poster_path: movie.poster_path,
+        backdrop_path: movie.backdrop_path,
+        release_date: movie.release_date,
+        vote_average: movie.vote_average,
+        genre_ids: movie.genres?.map((genre) => genre.id) ?? [],
+      });
+    }
+  };
+
+  /* ============================= */
+  /* FETCH MOVIE */
+  /* ============================= */
+
+  // এখান থেকে তোমার আগের useEffect রাখবে।
+  // এরপর আগের handleFavorite ও handleWatchTrailer রাখবে।
+  // Loading, Error এবং return JSX-ও আগের মতো রাখবে।
 
   /* ============================= */
   /* FETCH MOVIE */
@@ -593,7 +626,6 @@ function MovieDetails() {
 
                   {trailerLoading ? "Loading Trailer..." : "Watch Trailer"}
                 </button>
-
                 {/* Favorite */}
                 <button
                   type="button"
@@ -634,6 +666,30 @@ function MovieDetails() {
 
                   {favorite ? "Remove from Favorites" : "Add to Favorites"}
                 </button>
+                ```tsx
+                {/* Watchlist */}
+                <button
+                  type="button"
+                  onClick={handleWatchlist}
+                  className={`
+    inline-flex items-center gap-2
+    rounded-xl border px-6 py-3
+    text-sm font-semibold
+    backdrop-blur-md transition active:scale-95
+    ${
+      watchlisted
+        ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/15"
+        : "border-white/[0.1] bg-white/[0.05] text-zinc-300 hover:bg-white/[0.09] hover:text-white"
+    }
+  `}
+                >
+                  <Bookmark
+                    size={17}
+                    fill={watchlisted ? "currentColor" : "none"}
+                  />
+                  {watchlisted ? "Remove from Watchlist" : "Add to Watchlist"}
+                </button>
+                ```
               </div>
             </div>
           </div>
